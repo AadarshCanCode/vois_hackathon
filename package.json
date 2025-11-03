@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "fetch-faceapi": "node ./scripts/fetch-faceapi.js",
-    "proxy": "node server.mjs",
+    "proxy": "node backend/server.mjs",
     "dev:full": "concurrently \"npm:proxy\" \"npm:dev\""
   },
   "dependencies": {

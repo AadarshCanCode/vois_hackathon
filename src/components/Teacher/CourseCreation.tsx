@@ -12,6 +12,19 @@ interface ModuleInput {
 
 type FormStep = 'details' | 'modules';
 
+type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
+type DetailLevel = 'brief' | 'normal' | 'comprehensive';
+
+interface AiFormState {
+  title: string;
+  description: string;
+  category: string;
+  difficulty: DifficultyLevel;
+  estimated_hours: number;
+}
+
+type CourseFormState = AiFormState;
+
 import { Course, Module } from '../../types';
 
 interface CourseCreationProps {
@@ -27,12 +40,12 @@ const CourseCreation: React.FC<CourseCreationProps> = ({ onSuccess, onCancel, co
   const [currentStep, setCurrentStep] = useState<FormStep>('details');
   
   // Course form state
-  const [courseData, setCourseData] = useState({
-    title: course?.title || '',
-    description: course?.description || '',
-    category: course?.category || '',
-    difficulty: (course?.difficulty || 'beginner') as 'beginner' | 'intermediate' | 'advanced',
-    estimated_hours: course?.estimated_hours || 0
+  const [courseData, setCourseData] = useState<CourseFormState>({
+    title: course?.title ?? '',
+    description: course?.description ?? '',
+    category: course?.category ?? '',
+    difficulty: course?.difficulty ?? 'beginner',
+    estimated_hours: course?.estimated_hours ?? 0
   });
 
   // Modules state
@@ -45,7 +58,7 @@ const CourseCreation: React.FC<CourseCreationProps> = ({ onSuccess, onCancel, co
   const [aiModuleCount, setAiModuleCount] = useState<number>(5);
   const [publishAfterAi, setPublishAfterAi] = useState<boolean>(false);
   const [aiDetailLevel, setAiDetailLevel] = useState<'brief' | 'normal' | 'comprehensive'>('comprehensive');
-  const [aiForm, setAiForm] = useState({
+  const [aiForm, setAiForm] = useState<AiFormState>({
     title: courseData.title,
     description: courseData.description,
     category: courseData.category,
@@ -70,10 +83,16 @@ const CourseCreation: React.FC<CourseCreationProps> = ({ onSuccess, onCancel, co
 
   const handleCourseInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setCourseData(prev => ({
-      ...prev,
-      [name]: name === 'estimated_hours' ? Number(value) : value
-    }));
+
+    setCourseData(prev => {
+      if (name === 'estimated_hours') {
+        return { ...prev, estimated_hours: Number(value) };
+      }
+      if (name === 'difficulty') {
+        return { ...prev, difficulty: value as DifficultyLevel };
+      }
+      return { ...prev, [name]: value } as CourseFormState;
+    });
   };
 
   const handleModuleChange = (index: number, field: keyof ModuleInput, value: string) => {
@@ -204,7 +223,7 @@ const CourseCreation: React.FC<CourseCreationProps> = ({ onSuccess, onCancel, co
         throw new Error('AI provider not configured. Set VITE_GEMINI_API_KEY');
       }
 
-      const params = {
+      const params: Parameters<typeof aiService.generateCourseOutline>[0] = {
         title: overrides?.title ?? aiForm.title ?? courseData.title,
         description: overrides?.description ?? aiForm.description ?? courseData.description,
         category: overrides?.category ?? aiForm.category ?? courseData.category,
@@ -214,7 +233,7 @@ const CourseCreation: React.FC<CourseCreationProps> = ({ onSuccess, onCancel, co
         detailLevel: aiDetailLevel,
       };
 
-      const generated = await aiService.generateCourseOutline(params as any);
+      const generated = await aiService.generateCourseOutline(params);
 
       // Map AI modules into ModuleInput and set into preview state for confirmation
       const mapped: ModuleInput[] = generated.map(m => ({
@@ -578,7 +597,7 @@ const CourseCreation: React.FC<CourseCreationProps> = ({ onSuccess, onCancel, co
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-muted">Difficulty</label>
-                  <select value={aiForm.difficulty} onChange={(e) => setAiForm(prev => ({ ...prev, difficulty: e.target.value as any }))} className="mt-1 block w-full rounded-md bg-card border-card text-contrast p-2">
+                  <select value={aiForm.difficulty} onChange={(e) => setAiForm(prev => ({ ...prev, difficulty: e.target.value as DifficultyLevel }))} className="mt-1 block w-full rounded-md bg-card border-card text-contrast p-2">
                     <option value="beginner">Beginner</option>
                     <option value="intermediate">Intermediate</option>
                     <option value="advanced">Advanced</option>
@@ -594,7 +613,7 @@ const CourseCreation: React.FC<CourseCreationProps> = ({ onSuccess, onCancel, co
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-muted">Detail level</label>
-                  <select value={aiDetailLevel} onChange={(e) => setAiDetailLevel(e.target.value as any)} className="mt-1 block w-full rounded-md bg-card border-card text-contrast p-2">
+                  <select value={aiDetailLevel} onChange={(e) => setAiDetailLevel(e.target.value as DetailLevel)} className="mt-1 block w-full rounded-md bg-card border-card text-contrast p-2">
                     <option value="brief">Brief</option>
                     <option value="normal">Normal</option>
                     <option value="comprehensive">Comprehensive</option>
