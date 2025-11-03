@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Users, PlusCircle, BarChart, Edit, Trash2, Eye } from 'lucide-react';
 import { CourseCreation } from './CourseCreation';
-import { courseService } from '../../services/courseService';
-import { Course } from '../../types';
-import { useAuth } from '../../context/AuthContext';
+import { courseService } from '@services/courseService';
+import type { Course } from '@types';
+import { useAuth } from '@context/AuthContext';
 
 export const TeacherDashboard: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);

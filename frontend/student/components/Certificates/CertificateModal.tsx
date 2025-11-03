@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
 import { Award, Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
-import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../context/AuthContext';
-import type { User } from '../../types';
+import { supabase } from '@lib/supabase';
+import { useAuth } from '@context/AuthContext';
+import type { User } from '@types';
 
 interface CertificateModalProps {
   isOpen: boolean;

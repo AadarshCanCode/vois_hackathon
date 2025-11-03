@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
-import { assessmentService } from '../../services/assessmentService';
-import { ragService } from '../../services/ragService';
-import { learningPathService } from '../../services/learningPathService';
-import { learnerMemoryService } from '../../services/learnerMemoryService';
-import { useAuth } from '../../context/AuthContext';
+import { assessmentService } from '@services/assessmentService';
+import { ragService } from '@services/ragService';
+import { learningPathService } from '@services/learningPathService';
+import { learnerMemoryService } from '@services/learnerMemoryService';
+import { useAuth } from '@context/AuthContext';
 
 interface FinalExamProps {
   courseId: string;

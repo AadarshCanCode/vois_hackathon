@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authService } from '../services/authService';
-import type { User } from '../types';
+import { authService } from '@services/authService';
+import type { User } from '@types';
 
 interface AuthContextValue {
   user: (User & { role?: 'student' | 'teacher' | 'admin'; created_at?: string | Date }) | null;

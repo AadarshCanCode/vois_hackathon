@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Module } from '../../types';
-import { courseService } from '../../services/courseService';
+import type { Module } from '@types';
+import { courseService } from '@services/courseService';
 
 interface ModuleManagerProps {
   courseId: string;

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, FileText, FlaskRound as Flask, CheckCircle, Clock, Award } from 'lucide-react';
 import { CertificateModal } from '../Certificates/CertificateModal';
-import { courseService } from '../../services/courseService';
-import type { Module, Course } from '../../types';
+import { courseService } from '@services/courseService';
+import type { Module, Course } from '@types';
 import { ModuleTest } from './ModuleTest';
 import { VideoPlayer } from '../Video/VideoPlayer';
-import { learningPathService } from '../../services/learningPathService';
-import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../context/AuthContext';
+import { learningPathService } from '@services/learningPathService';
+import { supabase } from '@lib/supabase';
+import { useAuth } from '@context/AuthContext';
 
 interface ModuleViewerProps {
   courseId: string;

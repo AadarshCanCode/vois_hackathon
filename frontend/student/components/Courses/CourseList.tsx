@@ -2,10 +2,9 @@ import React from 'react';
 import { Lock, Play, CheckCircle, Clock, BookOpen } from 'lucide-react';
 // Note: we no longer rely on static sample courses; DB-backed data is used via courseService
 import { useEffect, useState } from 'react';
-import type { Course, Module } from '../../types';
-import { courseService } from '../../services/courseService';
-import { useAuth } from '../../context/AuthContext';
-import type { User } from '../../types';
+import type { Course, Module, User } from '@types';
+import { courseService } from '@services/courseService';
+import { useAuth } from '@context/AuthContext';
 
 interface CourseListProps {
   onCourseSelect: (courseId: string) => void;

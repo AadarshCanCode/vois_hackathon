@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { courseService } from '../../services/courseService';
-import { aiService } from '../../services/aiService';
-import { useAuth } from '../../context/AuthContext';
+import { courseService } from '@services/courseService';
+import { aiService } from '@services/aiService';
+import { useAuth } from '@context/AuthContext';
+import type { Course, Module } from '@types';
 
 interface ModuleInput {
   title: string;
@@ -25,7 +26,7 @@ interface AiFormState {
 
 type CourseFormState = AiFormState;
 
-import { Course, Module } from '../../types';
+
 
 interface CourseCreationProps {
   onSuccess?: (course: Course) => void;

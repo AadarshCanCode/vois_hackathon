@@ -15,8 +15,17 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: {
-        '@': resolve(rootDir, 'src'),
+        '@': resolve(rootDir, 'frontend'),
         '@frontend': resolve(rootDir, 'frontend'),
+        '@student': resolve(rootDir, 'frontend/student'),
+        '@teacher': resolve(rootDir, 'frontend/teacher'),
+        '@admin': resolve(rootDir, 'frontend/admin'),
+        '@context': resolve(rootDir, 'frontend/context'),
+        '@services': resolve(rootDir, 'frontend/services'),
+        '@data': resolve(rootDir, 'frontend/data'),
+        '@lib': resolve(rootDir, 'frontend/lib'),
+        '@styles': resolve(rootDir, 'frontend/styles'),
+        '@types': resolve(rootDir, 'frontend/types'),
       },
     },
   };

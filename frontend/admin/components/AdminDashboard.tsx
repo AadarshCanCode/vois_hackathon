@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Users, BookOpen, BarChart3, Eye, Crown, GraduationCap, TrendingUp } from 'lucide-react';
-import { adminService } from '../../services/adminService';
-import { supabase } from '../../lib/supabase';
-import type { User } from '../../types';
+import { adminService } from '@services/adminService';
+import { supabase } from '@lib/supabase';
+import type { User } from '@types';
 
 type Role = 'student' | 'teacher' | 'admin';
 type View = 'overview' | 'users' | 'courses' | 'analytics';

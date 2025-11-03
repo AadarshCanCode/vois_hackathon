@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Download, Search, Filter, Plus, Upload } from 'lucide-react';
-import { adminService } from '../../services/adminService';
+import { adminService } from '@services/adminService';
 // Note type isn't exported from lib/supabase in this workspace; use a local minimal type
 interface Note {
   id: string;
@@ -10,7 +10,7 @@ interface Note {
   course_id: string;
   created_at: string;
 }
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@context/AuthContext';
 
 export const NotesTab: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);

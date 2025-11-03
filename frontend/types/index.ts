@@ -73,3 +73,4 @@ export interface ChatMessage {
   isUser: boolean;
   timestamp: Date;
 }
+export * from "./types";
