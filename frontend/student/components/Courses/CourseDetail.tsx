@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Play, CheckCircle, Clock, FileText, FlaskRound as Flask, Award } from 'lucide-react';
 import { ModuleViewer } from './ModuleViewer';
-import { courseService } from '../../services/courseService';
-import type { Course, Module } from '../../types';
-import { useAuth } from '../../context/AuthContext';
+import { courseService } from '@/services/courseService';
+import type { Course, Module } from '@/types';
+import { useAuth } from '@/context/AuthContext';
 
 interface CourseDetailProps {
   courseId: string;

@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, X, Bot, User } from 'lucide-react';
-import { aiService } from '../../services/aiService';
-import { learnerMemoryService } from '../../services/learnerMemoryService';
-import { ragDocsService } from '../../services/ragDocsService';
-import { useAuth } from '../../context/AuthContext';
+import { aiService } from '@/services/aiService';
+import { learnerMemoryService } from '@/services/learnerMemoryService';
+import { ragDocsService } from '@/services/ragDocsService';
+import { useAuth } from '@/context/AuthContext';
 
 export interface ChatMessage {
   id: string;
