@@ -9,8 +9,11 @@
     "paths": {
       "@/*": ["frontend/*"],
       "@frontend/*": ["frontend/*"],
+      "@student": ["frontend/student/index.ts"],
       "@student/*": ["frontend/student/*"],
+      "@teacher": ["frontend/teacher/index.ts"],
       "@teacher/*": ["frontend/teacher/*"],
+      "@admin": ["frontend/admin/index.ts"],
       "@admin/*": ["frontend/admin/*"],
       "@context/*": ["frontend/context/*"],
       "@services/*": ["frontend/services/*"],
