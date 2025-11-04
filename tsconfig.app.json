@@ -7,8 +7,17 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@frontend/*": ["frontend/*"]
+      "@/*": ["frontend/*"],
+      "@frontend/*": ["frontend/*"],
+      "@student/*": ["frontend/student/*"],
+      "@teacher/*": ["frontend/teacher/*"],
+      "@admin/*": ["frontend/admin/*"],
+      "@context/*": ["frontend/context/*"],
+      "@services/*": ["frontend/services/*"],
+      "@data/*": ["frontend/data/*"],
+      "@lib/*": ["frontend/lib/*"],
+      "@styles/*": ["frontend/styles/*"],
+      "@types/*": ["frontend/types/*"]
     },
 
     /* Bundler mode */
@@ -25,5 +34,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "frontend"]
+  "include": ["frontend"]
 }

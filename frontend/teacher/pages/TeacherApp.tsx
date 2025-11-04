@@ -1,4 +1,4 @@
-import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { AuthProvider, useAuth } from '@context/AuthContext';
 import { TeacherDashboardShell } from '../components/TeacherDashboardShell';
 
 const TeacherAppContent = () => {

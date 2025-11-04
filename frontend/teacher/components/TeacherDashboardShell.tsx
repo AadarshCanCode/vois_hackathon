@@ -1,4 +1,4 @@
-import { TeacherDashboard } from '@/components/Teacher/TeacherDashboard';
+import { TeacherDashboard } from '@teacher/components/TeacherDashboard';
 import '../styles/teacher.css';
 
 export const TeacherDashboardShell = () => {
