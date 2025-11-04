@@ -11,6 +11,7 @@ import { courseRouter } from './modules/courses/course.routes';
 import { assessmentRouter } from './modules/assessments/assessment.routes';
 import { learningPathRouter } from './modules/learning/learning-path.routes';
 import { learnerMemoryRouter } from './modules/memory/learner-memory.routes';
+import { userRouter } from './modules/users/user.routes';
 import { aiRouter } from './modules/ai/ai.routes';
 import { ragRouter } from './modules/rag/rag.routes';
 
@@ -36,6 +37,7 @@ app.use('/api/courses', courseRouter);
 app.use('/api/assessments', assessmentRouter);
 app.use('/api/learning-path', learningPathRouter);
 app.use('/api/memory', learnerMemoryRouter);
+app.use('/api/users', userRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/rag', ragRouter);
 

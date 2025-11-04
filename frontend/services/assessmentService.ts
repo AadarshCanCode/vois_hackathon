@@ -15,6 +15,7 @@ export interface AssessmentAnswerInput {
   confidence_level: number;
   is_correct: boolean;
   context?: AssessmentAttempt['context'];
+  time_taken_seconds?: number;
 }
 
 class AssessmentService {

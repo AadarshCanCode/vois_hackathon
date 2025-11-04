@@ -2,9 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Clock, CheckCircle, XCircle, AlertCircle, TrendingUp, Camera, Mic, Video } from 'lucide-react';
 import { assessmentQuestions } from '@data/assessmentQuestions';
 import { useAuth } from '@context/AuthContext';
-// import types from '@types' (none needed here)
-import { supabase } from '@lib/supabase';
 import { assessmentService } from '@services/assessmentService';
+import { userService } from '@services/userService';
 import { ragService } from '@services/ragService';
 import { learningPathService } from '@services/learningPathService';
 import { courseService } from '@services/courseService';
@@ -137,23 +136,24 @@ export const AssessmentTest: React.FC = () => {
     // Reset confidence to middle when selecting new answer
   };
 
-  const handleNextQuestion = () => {
-    if (selectedAnswer !== null) {
-      // Save response to database
-      saveAssessmentResponse();
-      
-      const newAnswers = [...answers];
-      newAnswers[currentQuestionIndex] = selectedAnswer;
-      setAnswers(newAnswers);
+  const handleNextQuestion = async () => {
+    if (selectedAnswer === null) {
+      return;
+    }
 
-      if (currentQuestionIndex < assessmentQuestions.length - 1) {
-        setCurrentQuestionIndex(currentQuestionIndex + 1);
-        setSelectedAnswer(answers[currentQuestionIndex + 1] ?? null);
-        setConfidenceLevel(3); // Reset confidence for next question
-        setQuestionStartTime(new Date()); // Reset timer for next question
-      } else {
-        handleSubmitTest(newAnswers);
-      }
+    await saveAssessmentResponse();
+
+    const newAnswers = [...answers];
+    newAnswers[currentQuestionIndex] = selectedAnswer;
+    setAnswers(newAnswers);
+
+    if (currentQuestionIndex < assessmentQuestions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setSelectedAnswer(answers[currentQuestionIndex + 1] ?? null);
+      setConfidenceLevel(3); // Reset confidence for next question
+      setQuestionStartTime(new Date()); // Reset timer for next question
+    } else {
+      await handleSubmitTest(newAnswers);
     }
   };
 
@@ -174,9 +174,9 @@ export const AssessmentTest: React.FC = () => {
     // called when exam ends (manual or proctoring)
     // Save final response if not already saved
     if (selectedAnswer !== null) {
-      saveAssessmentResponse();
+      await saveAssessmentResponse();
     }
-    
+
     setSubmitting(true);
     setSubmitError('');
     try {
@@ -192,11 +192,13 @@ export const AssessmentTest: React.FC = () => {
 
       // Persist user level + completion
       if (user?.id) {
-        await supabase.from('users').update({ level, completed_assessment: true }).eq('id', user.id);
-        updateUser({ completedAssessment: true, level });
-      } else {
-        updateUser({ completedAssessment: true, level });
+        try {
+          await userService.updateProfile(user.id, { level, completedAssessment: true });
+        } catch (profileError) {
+          console.error('Failed to update user profile after assessment:', profileError);
+        }
       }
+      updateUser({ completedAssessment: true, level });
 
       // Allocate initial path if possible — use first published course from DB
       if (user?.id && analysis) {
@@ -274,12 +276,12 @@ export const AssessmentTest: React.FC = () => {
 
   const saveAssessmentResponse = async () => {
     if (!user || selectedAnswer === null) return;
-    
+
     try {
       const timeTaken = Math.floor((new Date().getTime() - questionStartTime.getTime()) / 1000);
       const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
-      
-      await supabase.from('assessment_responses').insert({
+
+      await assessmentService.submitAnswer({
         attempt_id: attemptId ?? undefined,
         user_id: user.id,
         question_id: currentQuestion.id,

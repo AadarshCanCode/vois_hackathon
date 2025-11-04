@@ -18,6 +18,7 @@ export interface AssessmentAnswerInput {
   confidence_level: number;
   is_correct: boolean;
   context?: AssessmentContext;
+  time_taken_seconds?: number;
 }
 
 function requireSupabase() {
@@ -75,7 +76,8 @@ export const assessmentService = {
       selected_answer: answer.selected_answer,
       confidence_level: answer.confidence_level,
       is_correct: answer.is_correct,
-      context: answer.context ?? 'initial'
+      context: answer.context ?? 'initial',
+      time_taken_seconds: answer.time_taken_seconds ?? null
     };
 
     const { error } = await client

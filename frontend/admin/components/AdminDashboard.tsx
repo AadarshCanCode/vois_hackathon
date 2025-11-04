@@ -1,86 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Users, BookOpen, BarChart3, Eye, Crown, GraduationCap, TrendingUp } from 'lucide-react';
 import { adminService } from '@services/adminService';
-import { supabase } from '@lib/supabase';
-import type { User } from '@types';
+import type { AdminCourseSummary, AdminDashboardStats, AdminUser, Role } from '@types/admin';
 
-type Role = 'student' | 'teacher' | 'admin';
 type View = 'overview' | 'users' | 'courses' | 'analytics';
-
-interface DashboardStats {
-  users: { teachers: number; students: number; total: number };
-  courses: { total: number; published: number; draft: number };
-  enrollments: { total: number; thisMonth: number };
-}
-
-interface CourseItem {
-  id: string;
-  title: string;
-  description: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  is_published: boolean;
-  enrollment_count: number;
-  teacher?: { id: string; name: string } | null;
-}
 
 export const AdminDashboard = () => {
   const [activeView, setActiveView] = useState<View>('overview');
-  const [users, setUsers] = useState<(User & { role?: Role; created_at?: string | Date; level?: 'beginner' | 'intermediate' | 'advanced' })[]>([]);
-  const [courses, setCourses] = useState<CourseItem[]>([]);
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [courses, setCourses] = useState<AdminCourseSummary[]>([]);
+  const [stats, setStats] = useState<AdminDashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const isMountedRef = useRef(true);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
+  const loadDashboardData = useCallback(async () => {
+    if (!isMountedRef.current) {
+      return;
+    }
 
-  useEffect(() => {
-    // Realtime updates for users, courses, and enrollments
-    const channel = supabase
-      .channel('admin-dashboard')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, () => {
-        loadDashboardData();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'courses' }, () => {
-        loadDashboardData();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'course_enrollments' }, () => {
-        loadDashboardData();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  const loadDashboardData = async (): Promise<void> => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const [usersData, coursesData, statsData] = await Promise.all<[
-        ReturnType<typeof adminService.getAllUsers>,
-        ReturnType<typeof adminService.getAllCourses>,
-        ReturnType<typeof adminService.getDashboardStats>
-      ]>([
+      const [usersData, coursesData, statsData] = await Promise.all([
         adminService.getAllUsers(),
         adminService.getAllCourses(),
         adminService.getDashboardStats()
       ]);
-      
-      setUsers(usersData as unknown as (User & { role?: Role; created_at?: string | Date; level?: 'beginner' | 'intermediate' | 'advanced' })[]);
-      setCourses(coursesData as unknown as CourseItem[]);
-      setStats(statsData as unknown as DashboardStats);
+
+      if (!isMountedRef.current) {
+        return;
+      }
+
+      setUsers(Array.isArray(usersData) ? usersData : []);
+      setCourses(Array.isArray(coursesData) ? coursesData : []);
+      setStats(statsData && typeof statsData === 'object' ? statsData as AdminDashboardStats : null);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadDashboardData();
+    const interval = window.setInterval(loadDashboardData, 30000);
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [loadDashboardData]);
+
+  useEffect(() => () => {
+    isMountedRef.current = false;
+  }, []);
 
   const handleRoleChange = async (userId: string, newRole: Role) => {
     try {
       await adminService.updateUserRole(userId, newRole);
-      setUsers(users.map(u => (u.id === userId ? { ...u, role: newRole } : u)));
+      setUsers(prev => prev.map(u => (u.id === userId ? { ...u, role: newRole } : u)));
     } catch (error) {
       console.error('Failed to update user role:', error);
     }
@@ -89,7 +66,7 @@ export const AdminDashboard = () => {
   const handleCourseStatusToggle = async (courseId: string, isPublished: boolean) => {
     try {
       await adminService.updateCourseStatus(courseId, isPublished);
-      setCourses(courses.map(c => (c.id === courseId ? { ...c, is_published: isPublished } : c)));
+      setCourses(prev => prev.map(c => (c.id === courseId ? { ...c, is_published: isPublished } : c)));
     } catch (error) {
       console.error('Failed to update course status:', error);
     }

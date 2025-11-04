@@ -220,8 +220,9 @@ const CourseCreation: React.FC<CourseCreationProps> = ({ onSuccess, onCancel, co
     setAiError('');
     setAiLoading(true);
     try {
-      if (!aiService.isGeminiEnabled()) {
-        throw new Error('AI provider not configured. Set VITE_GEMINI_API_KEY');
+      const enabled = await aiService.isGeminiEnabled();
+      if (!enabled) {
+        throw new Error('AI provider not configured. Set GEMINI_API_KEY on the server.');
       }
 
       const params: Parameters<typeof aiService.generateCourseOutline>[0] = {

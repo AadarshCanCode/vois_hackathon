@@ -16,15 +16,15 @@ class CourseService {
   }
 
   async getCoursesByTeacher(teacherId: string) {
-    return get(`/courses/teacher/${teacherId}`);
+    return get<Course[]>(`/courses/teacher/${teacherId}`);
   }
 
   async getAllCourses(): Promise<Course[]> {
-    return get('/courses');
+    return get<Course[]>('/courses');
   }
 
   async getCourseById(id: string): Promise<Course | null> {
-    return get(`/courses/${id}`);
+    return get<Course | null>(`/courses/${id}`);
   }
 
   async getModuleCount(courseId: string): Promise<number> {
@@ -41,7 +41,7 @@ class CourseService {
   }
 
   async getModulesByCourse(courseId: string) {
-    return get(`/courses/${courseId}/modules`);
+    return get<Module[]>(`/courses/${courseId}/modules`);
   }
 
   async updateProgress(progressData: unknown) {
@@ -49,7 +49,7 @@ class CourseService {
   }
 
   async getUserProgress(userId: string, courseId: string) {
-    return get(`/courses/${courseId}/progress?userId=${encodeURIComponent(userId)}`);
+    return get<unknown[]>(`/courses/${courseId}/progress?userId=${encodeURIComponent(userId)}`);
   }
 
   async enrollInCourse(userId: string, courseId: string) {

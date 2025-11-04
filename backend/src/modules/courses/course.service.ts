@@ -253,7 +253,10 @@ export const courseService = {
       .upload(filePath, file.buffer, {
         contentType: file.mimetype
       });
-    handleError('Failed to upload file', uploadError);
+
+    if (uploadError) {
+      throw new Error(`Failed to upload file: ${uploadError.message}`);
+    }
 
     const { data } = client.storage
       .from('uploads')

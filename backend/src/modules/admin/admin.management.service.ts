@@ -101,7 +101,10 @@ export const adminManagementService = {
       .upload(filePath, file.buffer, {
         contentType: file.mimetype
       });
-    handleError('Failed to upload file', uploadError);
+
+    if (uploadError) {
+      throw new Error(`Failed to upload file: ${uploadError.message}`);
+    }
 
     const { data } = client.storage
       .from('uploads')
@@ -219,5 +222,15 @@ export const adminManagementService = {
       completedModules,
       averageScore
     };
+  },
+
+  async getAssessmentResponses() {
+    const client = requireSupabase();
+    const { data, error } = await client
+      .from('assessment_responses')
+      .select('*, user:users(name, email, level)')
+      .order('created_at', { ascending: false });
+    handleError('Failed to fetch assessment responses', error);
+    return data ?? [];
   }
 };

@@ -10,7 +10,7 @@ adminLegacyRouter.get('/proxy', async (req, res) => {
     const target = req.query.url;
     const result = await proxyRequest(String(target ?? ''));
 
-    if ('error' in result) {
+    if ('error' in result && result.error) {
       return res.status(result.error.status).send(result.error.message);
     }
 

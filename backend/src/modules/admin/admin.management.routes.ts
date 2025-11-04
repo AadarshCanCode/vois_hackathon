@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
+import type { Request } from 'express';
 import { adminManagementService } from './admin.management.service';
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -75,11 +76,12 @@ adminManagementRouter.post('/notes', async (req, res, next) => {
 
 adminManagementRouter.post('/notes/upload', upload.single('file'), async (req, res, next) => {
   try {
-    if (!req.file) {
+    const fileReq = req as Request & { file?: Express.Multer.File };
+    if (!fileReq.file) {
       res.status(400).json({ error: 'File is required' });
       return;
     }
-    const url = await adminManagementService.uploadFile(req.file, req.body.folder);
+    const url = await adminManagementService.uploadFile(fileReq.file, req.body.folder);
     res.status(201).json({ url });
   } catch (error) {
     next(error);
@@ -121,6 +123,15 @@ adminManagementRouter.get('/teachers/:id/analytics', async (req, res, next) => {
     const { id } = req.params;
     const analytics = await adminManagementService.getTeacherAnalytics(id);
     res.json(analytics);
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminManagementRouter.get('/assessments/responses', async (_req, res, next) => {
+  try {
+    const responses = await adminManagementService.getAssessmentResponses();
+    res.json(responses);
   } catch (error) {
     next(error);
   }

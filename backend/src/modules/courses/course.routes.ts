@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
+import type { Request } from 'express';
 import { courseService } from './course.service';
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
@@ -135,11 +136,12 @@ courseRouter.get('/user/:userId/enrollments', async (req, res, next) => {
 
 courseRouter.post('/upload', upload.single('file'), async (req, res, next) => {
   try {
-    if (!req.file) {
+    const fileReq = req as Request & { file?: Express.Multer.File };
+    if (!fileReq.file) {
       res.status(400).json({ error: 'File is required' });
       return;
     }
-    const url = await courseService.uploadFile(req.file, req.body.folder);
+    const url = await courseService.uploadFile(fileReq.file, req.body.folder);
     res.status(201).json({ url });
   } catch (error) {
     next(error);

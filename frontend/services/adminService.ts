@@ -1,18 +1,17 @@
 import { API_BASE_URL, del, get, patch, post } from '@lib/apiClient';
-
-type Role = 'student' | 'teacher' | 'admin';
+import type { AdminCourseSummary, AdminDashboardStats, AdminNote, AdminUser, AssessmentResponse, Role } from '@types/admin';
 
 class AdminService {
   async getAllUsers() {
-    return get('/admin/management/users');
+    return get<AdminUser[]>('/admin/management/users');
   }
 
   async getUsersByRole(role: Role) {
-    return get(`/admin/management/users/role/${role}`);
+    return get<AdminUser[]>(`/admin/management/users/role/${role}`);
   }
 
   async updateUserRole(userId: string, role: Role) {
-    return patch(`/admin/management/users/${userId}/role`, { role });
+    return patch<AdminUser | null>(`/admin/management/users/${userId}/role`, { role });
   }
 
   async deleteUser(userId: string) {
@@ -21,15 +20,15 @@ class AdminService {
   }
 
   async getAllCourses() {
-    return get('/admin/management/courses');
+    return get<AdminCourseSummary[]>('/admin/management/courses');
   }
 
   async getAllNotes() {
-    return get('/admin/management/notes');
+    return get<AdminNote[]>('/admin/management/notes');
   }
 
   async createNote(noteData: Record<string, unknown>) {
-    return post('/admin/management/notes', noteData);
+    return post<AdminNote | null>('/admin/management/notes', noteData);
   }
 
   async uploadFile(file: File, folder = 'uploads') {
@@ -51,19 +50,23 @@ class AdminService {
   }
 
   async updateCourseStatus(courseId: string, isPublished: boolean) {
-    return patch(`/admin/management/courses/${courseId}/status`, { isPublished });
+    return patch<AdminCourseSummary | null>(`/admin/management/courses/${courseId}/status`, { isPublished });
   }
 
   async getDashboardStats() {
-    return get('/admin/management/dashboard/stats');
+    return get<AdminDashboardStats>('/admin/management/dashboard/stats');
   }
 
   async getUserProgress(userId: string) {
-    return get(`/admin/management/users/${userId}/progress`);
+    return get<unknown[]>(`/admin/management/users/${userId}/progress`);
   }
 
   async getTeacherAnalytics(teacherId: string) {
-    return get(`/admin/management/teachers/${teacherId}/analytics`);
+    return get<Record<string, unknown>>(`/admin/management/teachers/${teacherId}/analytics`);
+  }
+
+  async getAssessmentResponses() {
+    return get<AssessmentResponse[]>('/admin/management/assessments/responses');
   }
 }
 
