@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Download, Search, Filter, Plus, Upload } from 'lucide-react';
 import { adminService } from '@services/adminService';
-// Note type isn't exported from lib/supabase in this workspace; use a local minimal type
+// Minimal note shape provided by the admin API
 interface Note {
   id: string;
   title: string;
@@ -23,7 +23,6 @@ export const NotesTab: React.FC = () => {
 
   useEffect(() => {
     loadNotes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

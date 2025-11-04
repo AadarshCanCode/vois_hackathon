@@ -1,101 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { BarChart3, Users, TrendingUp, CheckCircle, XCircle } from 'lucide-react';
-import { supabase } from '@lib/supabase';
-
-// Types removed for JavaScript conversion
+import { adminService } from '@services/adminService';
+import type { AssessmentResponse } from '@types/admin';
 
 export const AssessmentAnalytics: React.FC = () => {
-  type Resp = { id: string; question_id: string; is_correct: boolean; confidence_level: number; user_id?: string; user?: { name?: string; email?: string; level?: string }; selected_answer?: number; time_taken_seconds?: number };
   type QAnalytics = { question_id: string; question_text: string; total_responses: number; correct_responses: number; average_confidence: number; difficulty_rating: number; common_wrong_answers: { answer: number; count: number }[] };
 
-  const [responses, setResponses] = useState<Resp[]>([]);
+  const [responses, setResponses] = useState<AssessmentResponse[]>([]);
   const [questionAnalytics, setQuestionAnalytics] = useState<QAnalytics[]>([]);
   const [loading, setLoading] = useState(true);
-  // selectedQuestion removed (not yet implemented); track selection via click handler if needed
+  const isMountedRef = useRef(true);
 
-  useEffect(() => {
-    loadAssessmentData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const processQuestionAnalytics = useCallback((data: AssessmentResponse[]) => {
+    const questionMap = new Map<string, { responses: AssessmentResponse[]; question_text: string }>();
 
-  useEffect(() => {
-    // Realtime updates for assessment responses and related user data changes
-    const channel = supabase
-      .channel('assessment-analytics')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'assessment_responses' }, () => {
-        loadAssessmentData();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, () => {
-        // User name/level changes should reflect in recent responses
-        loadAssessmentData();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const loadAssessmentData = async () => {
-    try {
-      setLoading(true);
-      
-      // Load all assessment responses with user data
-      const { data: responsesData, error: responsesError } = await supabase
-        .from('assessment_responses')
-        .select(`
-          *,
-          user:users(name, email, level)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (responsesError) throw responsesError;
-      setResponses(responsesData || []);
-
-      // Process question analytics
-      const analytics = processQuestionAnalytics(responsesData || []);
-      setQuestionAnalytics(analytics);
-      
-    } catch (error) {
-      console.error('Failed to load assessment data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const processQuestionAnalytics = (responses: Resp[]) => {
-    const questionMap = new Map<string, { responses: Resp[]; question_text: string }>();
-
-    // Group responses by question
-    responses.forEach(response => {
-      if (!questionMap.has(response.question_id)) {
+    data.forEach(response => {
+      const existing = questionMap.get(response.question_id);
+      if (!existing) {
         questionMap.set(response.question_id, {
-          responses: [],
+          responses: [response],
           question_text: `Question ${response.question_id}`
         });
+      } else {
+        existing.responses.push(response);
       }
-      questionMap.get(response.question_id)!.responses.push(response);
     });
 
-    // Calculate analytics for each question
-    return Array.from(questionMap.entries()).map(([questionId, data]) => {
-      const questionResponses = data.responses;
+    return Array.from(questionMap.entries()).map(([questionId, meta]) => {
+      const questionResponses = meta.responses;
       const totalResponses = questionResponses.length;
       const correctResponses = questionResponses.filter(r => r.is_correct).length;
-      const averageConfidence = questionResponses.reduce((sum, r) => sum + r.confidence_level, 0) / totalResponses;
-      
-      // Calculate difficulty rating (lower success rate = higher difficulty)
-      const successRate = correctResponses / totalResponses;
+      const averageConfidence = totalResponses > 0
+        ? questionResponses.reduce((sum, r) => sum + (r.confidence_level ?? 0), 0) / totalResponses
+        : 0;
+
+      const successRate = totalResponses > 0 ? correctResponses / totalResponses : 0;
       const difficultyRating = Math.round((1 - successRate) * 5);
 
-      // Find common wrong answers
       const wrongAnswers = questionResponses.filter(r => !r.is_correct);
       const answerCounts = new Map<number, number>();
       wrongAnswers.forEach(r => {
         const ans = typeof r.selected_answer === 'number' ? r.selected_answer : -1;
         answerCounts.set(ans, (answerCounts.get(ans) || 0) + 1);
       });
-      
+
       const commonWrongAnswers = Array.from(answerCounts.entries())
         .map(([answer, count]) => ({ answer, count }))
         .sort((a, b) => b.count - a.count)
@@ -103,7 +51,7 @@ export const AssessmentAnalytics: React.FC = () => {
 
       return {
         question_id: questionId,
-        question_text: data.question_text,
+        question_text: meta.question_text,
         total_responses: totalResponses,
         correct_responses: correctResponses,
         average_confidence: averageConfidence,
@@ -111,7 +59,42 @@ export const AssessmentAnalytics: React.FC = () => {
         common_wrong_answers: commonWrongAnswers
       };
     }).sort((a, b) => b.total_responses - a.total_responses);
-  };
+  }, []);
+
+  const loadAssessmentData = useCallback(async () => {
+    if (!isMountedRef.current) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await adminService.getAssessmentResponses();
+      if (!isMountedRef.current) {
+        return;
+      }
+      const normalized = Array.isArray(data) ? data : [];
+      setResponses(normalized);
+      setQuestionAnalytics(processQuestionAnalytics(normalized));
+    } catch (error) {
+      console.error('Failed to load assessment data:', error);
+    } finally {
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
+    }
+  }, [processQuestionAnalytics]);
+
+  useEffect(() => {
+    loadAssessmentData();
+    const interval = window.setInterval(loadAssessmentData, 30000);
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [loadAssessmentData]);
+
+  useEffect(() => () => {
+    isMountedRef.current = false;
+  }, []);
 
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 4) return 'badge-strong-emerald';
@@ -173,7 +156,7 @@ export const AssessmentAnalytics: React.FC = () => {
               <div>
                 <p className="text-muted text-sm font-medium">Avg Confidence</p>
                 <p className="text-3xl font-bold text-primary">
-                  {responses.length > 0 ? (responses.reduce((sum, r) => sum + r.confidence_level, 0) / responses.length).toFixed(1) : '0.0'}
+                  {responses.length > 0 ? (responses.reduce((sum, r) => sum + (r.confidence_level ?? 0), 0) / responses.length).toFixed(1) : '0.0'}
                 </p>
               </div>
               <TrendingUp className="h-12 w-12 accent-amber" />
