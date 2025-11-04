@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Shield, Eye, EyeOff, GraduationCap, Users, ArrowLeft } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@context/AuthContext';
 
 interface LoginFormProps {
   userType?: 'student' | 'teacher' | null;

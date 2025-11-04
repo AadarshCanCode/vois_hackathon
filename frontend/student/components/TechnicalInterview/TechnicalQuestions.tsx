@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Building2, Clock, Star, ChevronRight, Lightbulb, CheckCircle, Eye, EyeOff } from 'lucide-react';
-import { technicalQuestions, TechnicalQuestion } from '../../data/technicalQuestions';
+import { technicalQuestions, TechnicalQuestion } from '@data/technicalQuestions';
 
 export const TechnicalQuestions: React.FC = () => {
   const [selectedQuestion, setSelectedQuestion] = useState<TechnicalQuestion | null>(null);

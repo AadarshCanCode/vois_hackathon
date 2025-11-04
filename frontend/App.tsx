@@ -1,4 +1,4 @@
-import { StudentApp } from '@frontend/student';
+import { StudentApp } from '@student';
 
 const App = () => {
   return <StudentApp />;

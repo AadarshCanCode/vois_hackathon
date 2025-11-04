@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase';
-import type { Course, Module } from '../types';
+import { supabase } from '@lib/supabase';
+import type { Course, Module } from '@types';
 
 class CourseService {
   // Course Management

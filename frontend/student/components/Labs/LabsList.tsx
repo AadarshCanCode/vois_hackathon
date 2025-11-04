@@ -1,6 +1,6 @@
 import React from 'react';
 import { FlaskRound as Flask, Clock, User, CheckCircle, ArrowRight } from 'lucide-react';
-import { labs } from '../../data/labs';
+import { labs } from '@data/labs';
 
 interface LabsListProps {
   onLabSelect: (labId: string) => void;

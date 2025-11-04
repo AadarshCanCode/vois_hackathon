@@ -1,6 +1,6 @@
 import React from 'react';
 import { Home, BookOpen, FlaskRound as Flask, Trophy, User, BarChart, Video, Building2, FileText, Settings, Users, PlusCircle, BarChart3 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@context/AuthContext';
 
 interface SidebarProps {
   activeTab: string;

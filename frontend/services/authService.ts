@@ -1,6 +1,6 @@
-import { supabase, testSupabaseConnection } from '../lib/supabase';
+import { supabase, testSupabaseConnection } from '@lib/supabase';
 import bcrypt from 'bcryptjs';
-import type { User } from '../types';
+import type { User } from '@types';
 
 type DBUser = {
   id: string;

@@ -1,5 +1,5 @@
-import { AuthProvider, useAuth } from '@/context/AuthContext';
-import { AdminLogin } from '@frontend/admin/components/AdminLogin';
+import { AuthProvider, useAuth } from '@context/AuthContext';
+import { AdminLogin } from '@admin/components/AdminLogin';
 import { AdminPortal } from '../components/AdminPortal';
 
 const AdminAppContent = () => {

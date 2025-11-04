@@ -1,6 +1,6 @@
 import React from 'react';
 import { Award, Download, Star, Calendar, CheckCircle } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@context/AuthContext';
 
 export const Certificates: React.FC = () => {
   const { user } = useAuth();

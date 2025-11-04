@@ -1,6 +1,6 @@
 import React from 'react';
 import { BookOpen, Target, Trophy, Clock, TrendingUp, Shield } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@context/AuthContext';
 import { LiveStream } from '../Video/LiveStream';
 
 export const Dashboard: React.FC = () => {

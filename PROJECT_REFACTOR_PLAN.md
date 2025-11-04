@@ -40,6 +40,14 @@
 ## Frontend Structure
 ```
 /frontend
+  App.tsx               # Shared entry that mounts the student app by default
+  main.tsx              # Vite bootstrap importing ./styles/index.css
+  /context              # React providers (AuthContext)
+  /data                 # Static question/lab datasets
+  /lib                  # Supabase client and other singletons
+  /services             # API client wrappers grouped by domain
+  /styles               # Global Tailwind + theme tokens
+  /types                # Shared TypeScript types and re-exports
   /student
     /components
       StudentAppContent.tsx
@@ -65,13 +73,14 @@
       admin.css
     index.ts
 ```
-- **Primary Shell**: `src/App.tsx` now delegates to `@frontend/student`'s `StudentApp`, which wraps the original application flow via `StudentAppContent`.
+- **Primary Shell**: `frontend/App.tsx` now delegates to `@student`'s `StudentApp`, which wraps the original application flow via `StudentAppContent`.
 - **Module Placeholders**: Teacher and admin modules expose dedicated entry points and styling hooks; they currently wrap existing shared components and will be expanded with module-specific logic in subsequent iterations.
 
 ## Configuration Updates
-- Added TypeScript path aliases `@/*` → `src/*` and `@frontend/*` → `frontend/*` (`tsconfig.app.json`).
-- Updated Vite configuration to honour the new aliases (`vite.config.ts`).
-- Adjusted NPM script `proxy` to run the relocated backend server at `backend/server.mjs`.
+- Added TypeScript path aliases for each workspace segment (`@context/*`, `@services/*`, `@data/*`, `@lib/*`, `@styles/*`, `@types/*`, `@student/*`, `@teacher/*`, `@admin/*`).
+- Updated Vite configuration to honour the new aliases and point `@` to `/frontend` (`vite.config.ts`).
+- Adjusted Tailwind content glob to scan `frontend/**/*.{js,ts,jsx,tsx}`.
+- Adjusted NPM script `proxy` earlier to run `backend/server.mjs`.
 
 ## Next Steps
 1. Migrate shared UI assets/components into module-specific or shared frontend workspaces as needed.

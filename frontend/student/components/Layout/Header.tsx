@@ -1,5 +1,5 @@
 import { Shield, User, LogOut, MessageCircle } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@context/AuthContext';
 
 export const Header: React.FC<{ onChatToggle: () => void }> = ({ onChatToggle }) => {
   const { user, logout } = useAuth();

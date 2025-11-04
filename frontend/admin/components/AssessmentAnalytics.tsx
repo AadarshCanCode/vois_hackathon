@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, Users, TrendingUp, CheckCircle, XCircle } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@lib/supabase';
 
 // Types removed for JavaScript conversion
 

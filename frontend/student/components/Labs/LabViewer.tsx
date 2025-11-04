@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowLeft, Clock, User, CheckCircle, ExternalLink, Play } from 'lucide-react';
-import { labs } from '../../data/labs';
+import { labs } from '@data/labs';
 import { RealTimeLabEnvironment } from './RealTimeLabEnvironment';
 import { VideoPlayer } from '../Video/VideoPlayer';
 

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Clock, CheckCircle, XCircle, AlertCircle, TrendingUp, Camera, Mic, Video } from 'lucide-react';
-import { assessmentQuestions } from '@/data/assessmentQuestions';
-import { useAuth } from '@/context/AuthContext';
-// import types from '@/types' (none needed here)
-import { supabase } from '@/lib/supabase';
-import { assessmentService } from '@/services/assessmentService';
-import { ragService } from '@/services/ragService';
-import { learningPathService } from '@/services/learningPathService';
-import { courseService } from '@/services/courseService';
+import { assessmentQuestions } from '@data/assessmentQuestions';
+import { useAuth } from '@context/AuthContext';
+// import types from '@types' (none needed here)
+import { supabase } from '@lib/supabase';
+import { assessmentService } from '@services/assessmentService';
+import { ragService } from '@services/ragService';
+import { learningPathService } from '@services/learningPathService';
+import { courseService } from '@services/courseService';
 import Proctoring from './Proctoring';
 import ViolationNotification from './ViolationNotification';
 import ExamTerminationModal from './ExamTerminationModal';

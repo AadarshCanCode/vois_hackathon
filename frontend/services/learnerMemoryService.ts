@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '@lib/supabase';
 
 export interface MemoryFact {
   kind: 'strength' | 'gap' | 'preference' | 'note';

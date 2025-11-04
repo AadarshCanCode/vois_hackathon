@@ -1,6 +1,6 @@
 import React from 'react';
 import { User, Award, BookOpen, Target, Clock, Star } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@context/AuthContext';
 
 export const Profile: React.FC = () => {
   const { user } = useAuth();
