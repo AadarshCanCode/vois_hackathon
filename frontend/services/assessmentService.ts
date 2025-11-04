@@ -1,62 +1,67 @@
-import { supabase } from '@lib/supabase';
+import { apiClient, ApiResponse } from './apiClient';
+import { Question, AssessmentAttempt, AssessmentAnswerInput, AssessmentResult } from '@types';
 
-export interface AssessmentAttempt {
-  id: string;
-  user_id: string;
-  context: 'initial' | 'in_content' | 'final_exam';
-  created_at?: string;
+export interface QuestionsResponse {
+  questions: Question[];
 }
 
-export interface AssessmentAnswerInput {
-  attempt_id?: string;
-  user_id: string;
-  question_id: string;
-  selected_answer: number;
-  confidence_level: number; // 1..5
-  is_correct: boolean;
-  context?: AssessmentAttempt['context'];
+export interface AttemptResponse {
+  attempt: AssessmentAttempt;
 }
 
-class AssessmentService {
-  async startAttempt(userId: string, context: AssessmentAttempt['context'] = 'initial') {
-    const attemptId = crypto.randomUUID();
-    try {
-      const { error } = await supabase.from('assessment_responses').insert([{ attempt_id: attemptId, user_id: userId, question_id: 'INIT', selected_answer: 0, confidence_level: 3, is_correct: true, context }]);
-      if (error) throw error;
-      await supabase.from('assessment_responses').delete().eq('attempt_id', attemptId).eq('question_id', 'INIT');
-      return { id: attemptId, user_id: userId, context } as AssessmentAttempt;
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.warn('Assessment attempt bootstrap failed, falling back to client-only attempt:', msg);
-      return { id: attemptId, user_id: userId, context } as AssessmentAttempt;
-    }
+export interface ResultsResponse {
+  results: AssessmentResult[];
+}
+
+export interface ScoreResponse {
+  score: {
+    score: number;
+    total: number;
+    percentage: number;
+  };
+}
+
+export class AssessmentService {
+  async getQuestions(params?: {
+    difficulty?: 'easy' | 'medium' | 'hard';
+    count?: number;
+  }): Promise<ApiResponse<QuestionsResponse>> {
+    const searchParams = new URLSearchParams();
+    if (params?.difficulty) searchParams.append('difficulty', params.difficulty);
+    if (params?.count) searchParams.append('count', params.count.toString());
+    
+    const query = searchParams.toString();
+    const endpoint = `/assessment/questions${query ? `?${query}` : ''}`;
+    
+    return apiClient.get<QuestionsResponse>(endpoint);
   }
 
-  async submitAnswer(answer: AssessmentAnswerInput) {
-    const payload = {
-      attempt_id: answer.attempt_id ?? crypto.randomUUID(),
-      user_id: answer.user_id,
-      question_id: answer.question_id,
-      selected_answer: answer.selected_answer,
-      confidence_level: answer.confidence_level,
-      is_correct: answer.is_correct,
-      context: answer.context ?? 'initial'
-    };
-    const { error } = await supabase.from('assessment_responses').insert([payload]);
-    if (error) throw new Error(`Failed to submit answer: ${error.message}`);
-    return true;
+  async getQuestion(id: string): Promise<ApiResponse<{ question: Question }>> {
+    return apiClient.get<{ question: Question }>(`/assessment/questions/${id}`);
   }
 
-  async getAttemptResults(attemptId: string) {
-    const { data, error } = await supabase
-      .from('assessment_responses')
-      .select('question_id, is_correct, confidence_level, context')
-      .eq('attempt_id', attemptId);
-    if (error) throw new Error(`Failed to fetch results: ${error.message}`);
-    return data ?? [];
+  async startAttempt(userId: string, context?: AssessmentAttempt['context']): Promise<ApiResponse<AttemptResponse>> {
+    return apiClient.post<AttemptResponse>('/assessment/attempts', {
+      userId,
+      context: context || 'initial'
+    });
+  }
+
+  async submitAnswer(answer: AssessmentAnswerInput): Promise<ApiResponse<{ success: boolean }>> {
+    return apiClient.post<{ success: boolean }>('/assessment/answers', answer);
+  }
+
+  async getAttemptResults(attemptId: string): Promise<ApiResponse<ResultsResponse>> {
+    return apiClient.get<ResultsResponse>(`/assessment/attempts/${attemptId}/results`);
+  }
+
+  async getAttemptScore(attemptId: string): Promise<ApiResponse<ScoreResponse>> {
+    return apiClient.get<ScoreResponse>(`/assessment/attempts/${attemptId}/score`);
+  }
+
+  async getUserAssessments(userId: string): Promise<ApiResponse<{ attempts: AssessmentAttempt[] }>> {
+    return apiClient.get<{ attempts: AssessmentAttempt[] }>(`/assessment/users/${userId}/attempts`);
   }
 }
 
 export const assessmentService = new AssessmentService();
-
-

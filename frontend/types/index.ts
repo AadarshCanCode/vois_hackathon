@@ -1,13 +1,29 @@
 export interface User {
   id: string;
   email: string;
-  name: string;
-  level: 'beginner' | 'intermediate' | 'advanced';
-  role?: 'student' | 'teacher' | 'admin';
-  completedAssessment: boolean;
-  courseProgress: Record<string, number>;
-  certificates: string[];
-  created_at?: string | Date;
+  name?: string | null;
+  role?: string;
+  level?: string;
+  completed_assessment?: boolean;
+  bio?: string;
+  specialization?: string;
+  experience_years?: string;
+  [key: string]: unknown;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+  role: string;
+}
+
+export interface RegisterData {
+  email: string;
+  password: string;
+  name?: string;
+  role: string;
+  bio?: string;
+  specialization?: string;
 }
 
 export interface Question {
@@ -17,6 +33,30 @@ export interface Question {
   correctAnswer: number;
   explanation: string;
   difficulty: 'easy' | 'medium' | 'hard';
+}
+
+export interface AssessmentAttempt {
+  id: string;
+  user_id: string;
+  context: 'initial' | 'in_content' | 'final_exam';
+  created_at?: string;
+}
+
+export interface AssessmentAnswerInput {
+  attempt_id?: string;
+  user_id: string;
+  question_id: string;
+  selected_answer: number;
+  confidence_level: number; // 1..5
+  is_correct: boolean;
+  context?: AssessmentAttempt['context'];
+}
+
+export interface AssessmentResult {
+  question_id: string;
+  is_correct: boolean;
+  confidence_level: number;
+  context: AssessmentAttempt['context'];
 }
 
 export interface Module {
@@ -63,8 +103,9 @@ export interface Lab {
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   estimatedTime: string;
   tools: string[];
+  liveUrl?: string;
   instructions: string;
-  completed: boolean;
+  objectives?: string[];
 }
 
 export interface ChatMessage {
@@ -73,4 +114,21 @@ export interface ChatMessage {
   isUser: boolean;
   timestamp: Date;
 }
+
+// Technical question types
+export interface TechnicalQuestion {
+  id: string;
+  company: string;
+  position: string;
+  difficulty: 'junior' | 'mid' | 'senior' | 'principal';
+  category: string;
+  question: string;
+  hints: string[];
+  solution: string;
+  explanation: string;
+  followUpQuestions?: string[];
+  tags: string[];
+  timeLimit: number; // in minutes
+}
+
 export * from "./types";
