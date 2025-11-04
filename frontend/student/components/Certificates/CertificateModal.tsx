@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
 import { Award, Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
-import { supabase } from '@lib/supabase';
 import { useAuth } from '@context/AuthContext';
-import type { User } from '@types';
+import { courseService } from '@services/courseService';
+import { userService } from '@services/userService';
 
 interface CertificateModalProps {
   isOpen: boolean;
@@ -40,44 +40,35 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
       console.warn('No authenticated user in context; certificate will not be saved to DB.');
     } else {
       const fileExt = 'png';
-  const sanitizedCourse = courseName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+      const sanitizedCourse = courseName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
       const fileName = `${userId}_${sanitizedCourse}_${Date.now()}.${fileExt}`;
-      const filePath = `certificates/${fileName}`;
 
       try {
-        const { error: uploadError } = await supabase.storage.from('certificates').upload(filePath, blob, { contentType: 'image/png' });
-        if (uploadError) {
-          console.error('Failed to upload certificate to storage:', uploadError.message ?? uploadError);
-        } else {
-          const { data: publicData } = supabase.storage.from('certificates').getPublicUrl(filePath);
-          const publicUrl = publicData?.publicUrl ?? '';
+        const file = new File([blob], fileName, { type: 'image/png' });
+        const publicUrl = await courseService.uploadFile(file, 'certificates');
 
-            try {
-            const { data: userRow, error: fetchErr } = await supabase.from('users').select('certificates').eq('id', userId).maybeSingle();
-            if (fetchErr) {
-              console.warn('Failed to fetch user row to append certificate:', fetchErr.message ?? fetchErr);
-            }
-            const existing = userRow?.certificates ?? [];
-            const newArr = Array.isArray(existing) ? [...existing, publicUrl] : [publicUrl];
-
-            const { error: updateErr } = await supabase.from('users').update({ certificates: newArr }).eq('id', userId);
-            if (updateErr) {
-              console.error('Failed to update user certificates array:', updateErr.message ?? updateErr);
+        let updatedCertificates = Array.isArray(user.certificates) ? [...user.certificates] : [];
+        try {
+          const serverResponse = await userService.appendCertificate(userId, publicUrl);
+          if (serverResponse && typeof serverResponse === 'object' && 'certificates' in (serverResponse as Record<string, unknown>)) {
+            const serverCertificates = (serverResponse as { certificates?: unknown }).certificates;
+            if (Array.isArray(serverCertificates)) {
+              updatedCertificates = serverCertificates as string[];
             } else {
-              // update local user object to include this certificate (so UI updates instantly)
-              if (updateUser) {
-                const patched: Partial<User> = { certificates: newArr };
-                try {
-                  updateUser(patched);
-                } catch (e) {
-                  // non-fatal, log briefly
-                  console.warn('updateUser call failed:', (e as Error).message ?? e);
-                }
-              }
+              updatedCertificates.push(publicUrl);
             }
-          } catch (e) {
-            console.error('Failed to append certificate to user row:', (e as Error).message ?? e);
+          } else {
+            updatedCertificates.push(publicUrl);
           }
+        } catch (appendError) {
+          console.warn('Failed to append certificate on server:', appendError);
+          updatedCertificates.push(publicUrl);
+        }
+
+        try {
+          updateUser({ certificates: updatedCertificates });
+        } catch (updateError) {
+          console.warn('updateUser call failed:', (updateError as Error).message ?? updateError);
         }
       } catch (error) {
         console.error('Failed to save/upload certificate:', (error as Error).message ?? error);

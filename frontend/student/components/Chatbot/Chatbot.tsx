@@ -86,7 +86,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose }) => {
       const safeMsg = error instanceof Error ? error.message : String(error) || 'Unknown error from AI service.';
       const botMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        message: `There was an issue connecting to Gemini. ${safeMsg}. Please ensure your API key is correctly set as VITE_GEMINI_API_KEY.`,
+        message: `There was an issue connecting to Gemini. ${safeMsg}. Please ensure the server GEMINI_API_KEY is configured.`,
         isUser: false,
         timestamp: new Date(),
       };

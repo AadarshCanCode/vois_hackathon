@@ -6,7 +6,6 @@ import type { Module, Course } from '@types';
 import { ModuleTest } from './ModuleTest';
 import { VideoPlayer } from '../Video/VideoPlayer';
 import { learningPathService } from '@services/learningPathService';
-import { supabase } from '@lib/supabase';
 import { useAuth } from '@context/AuthContext';
 
 interface ModuleViewerProps {
@@ -80,10 +79,16 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
       setCourse({ ...course });
 
       if (user?.id) {
-        await supabase.from('user_progress').upsert([{ user_id: user.id, course_id: courseId, module_id: moduleId, completed: true, quiz_score: module.testScore ?? null, source: skipTest ? 'manual' : 'test' }]);
+        await courseService.updateProgress({
+          user_id: user.id,
+          course_id: courseId,
+          module_id: moduleId,
+          completed: true,
+          quiz_score: module.testScore ?? null,
+          source: skipTest ? 'manual' : 'test'
+        });
         await learningPathService.rebalance(user.id, courseId);
-        // inform parent to refresh progress
-        if (onModuleStatusChange) onModuleStatusChange();
+        onModuleStatusChange?.();
       }
     } catch (e) {
       console.error('Failed to mark module completed:', e);
@@ -93,15 +98,20 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
   const completeCourseAndGenerateCertificate = async () => {
     // mark all modules completed if some are missing (for safety)
     try {
-        if (user?.id) {
-        const toUpsert = allModules.map(m => ({ user_id: user.id, course_id: courseId, module_id: m.id, completed: true, quiz_score: m.testScore ?? null, source: 'manual-course-complete' }));
-        await supabase.from('user_progress').upsert(toUpsert);
-        // inform parent to refresh progress, then show certificate
-        if (onModuleStatusChange) await onModuleStatusChange();
-        setShowCertificate(true);
-      } else {
-        setShowCertificate(true);
+      if (user?.id) {
+        const updates = allModules.map(m => courseService.updateProgress({
+          user_id: user.id,
+          course_id: courseId,
+          module_id: m.id,
+          completed: true,
+          quiz_score: m.testScore ?? null,
+          source: 'manual-course-complete'
+        }));
+        await Promise.all(updates);
+        await learningPathService.rebalance(user.id, courseId);
+        await onModuleStatusChange?.();
       }
+      setShowCertificate(true);
     } catch (e) {
       console.error('Failed to complete course:', e);
     }
@@ -115,10 +125,17 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({ courseId, moduleId, 
 
     // Persist progress and trigger rebalance
     try {
-        if (user?.id) {
-        await supabase.from('user_progress').upsert([{ user_id: user.id, course_id: courseId, module_id: moduleId, completed: true, quiz_score: score, source: 'adaptive' }]);
+      if (user?.id) {
+        await courseService.updateProgress({
+          user_id: user.id,
+          course_id: courseId,
+          module_id: moduleId,
+          completed: true,
+          quiz_score: score,
+          source: 'adaptive'
+        });
         await learningPathService.rebalance(user.id, courseId);
-        if (onModuleStatusChange) onModuleStatusChange();
+        onModuleStatusChange?.();
       }
     } catch (e) {
       console.error('Failed to persist progress or rebalance:', e);

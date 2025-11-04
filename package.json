@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "fetch-faceapi": "node ./scripts/fetch-faceapi.js",
-    "proxy": "node backend/server.mjs",
+    "build:backend": "tsc -p backend/tsconfig.json",
+    "start:backend": "node backend/dist/server.js",
+    "proxy": "tsx watch backend/src/server.ts",
+    "dev:backend": "tsx watch backend/src/server.ts",
     "dev:full": "concurrently \"npm:proxy\" \"npm:dev\""
   },
   "dependencies": {
@@ -27,6 +30,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
+    "@types/multer": "^2.0.0",
     "@types/pdfjs-dist": "^2.10.377",
     "@types/react": "^18.3.26",
     "@types/react-dom": "^18.3.7",
@@ -39,6 +45,7 @@
     "globals": "^15.15.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.18",
+    "tsx": "^4.19.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.1",
     "vite": "^7.1.10"
