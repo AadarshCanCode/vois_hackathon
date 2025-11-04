@@ -23,7 +23,6 @@ export const NotesTab: React.FC = () => {
 
   useEffect(() => {
     loadNotes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

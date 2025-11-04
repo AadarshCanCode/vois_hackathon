@@ -74,7 +74,7 @@ export const AssessmentTest: React.FC = () => {
       document.removeEventListener('paste', onCopyCutPaste);
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [permissionGranted, showResults]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [permissionGranted, showResults]);
 
   useEffect(() => {
     if (videoRef.current && mediaStream) {
