@@ -1,4 +1,4 @@
-import { StudentProfile, StudentCourseSummary, StudentDashboardSummary } from '../models/studentModel.mjs';
+import { StudentDashboardSummary, StudentCourseSummary, StudentProfile } from '../models/studentModel.js';
 
 const sampleProfile = new StudentProfile({
   id: 'student-001',
@@ -8,17 +8,20 @@ const sampleProfile = new StudentProfile({
   lastLogin: new Date().toISOString()
 });
 
-const sampleCourses = [
+const sampleCourses: StudentCourseSummary[] = [
   new StudentCourseSummary({ id: 'netsec-basics', title: 'Network Security Basics', progress: 0.65 }),
   new StudentCourseSummary({ id: 'ethical-hacking-101', title: 'Ethical Hacking 101', progress: 0.42 })
 ];
 
-export function getStudentDashboardSummary() {
+export function getStudentDashboardSummary(): StudentDashboardSummary {
+  const completedCourses = sampleCourses.filter(course => course.progress >= 1).length;
+  const activeCourses = sampleCourses.length - completedCourses;
+
   return new StudentDashboardSummary({
     profile: sampleProfile,
     stats: {
-      completedCourses: sampleCourses.filter(course => course.progress >= 1).length,
-      activeCourses: sampleCourses.filter(course => course.progress < 1).length,
+      completedCourses,
+      activeCourses,
       courseSummaries: sampleCourses
     }
   });
