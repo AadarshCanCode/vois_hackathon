@@ -28,5 +28,25 @@ export default defineConfig(({ mode }) => {
         '@types': resolve(rootDir, 'frontend/types'),
       },
     },
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:4000',
+          changeOrigin: true,
+        },
+        '/proxy': {
+          target: 'http://localhost:4000',
+          changeOrigin: true,
+        },
+        '/proctor-logs': {
+          target: 'http://localhost:4000',
+          changeOrigin: true,
+        },
+        '/test-models': {
+          target: 'http://localhost:4000',
+          changeOrigin: true,
+        },
+      },
+    },
   };
 });
